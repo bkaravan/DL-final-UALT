@@ -31,6 +31,8 @@ plays = [title.upper() for title in plays]
 os.makedirs('Shakespeare/Plays', exist_ok=True)
 os.makedirs('Shakespeare/Sonnets', exist_ok=True)
 os.makedirs('Shakespeare/Poems', exist_ok=True)
+os.makedirs('Shakespeare/Other', exist_ok=True)
+
 
 
 import re
@@ -65,15 +67,21 @@ def save_text(category, title, text):
 sections = content.split('by William Shakespeare')
 
 for i in range(len(sections) -1):
+    saved = False
     for title in plays:
         if title in sections[i]:
             save_text('Plays', title, sections[i+1])
+            saved = True
             break
     for title in sonnets:
         if title in sections[i]:
             save_text('Sonnets', title, sections[i+1])
+            saved = True
             break
     for title in poems:
         if title in sections[i]:
             save_text('Poems', title, sections[i+1])
+            saved = True
             break
+        if not saved:
+            save_text('Other', 'Uncategorized-' + str(i), sections[i+1])
