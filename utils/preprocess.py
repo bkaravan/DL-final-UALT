@@ -1,5 +1,6 @@
 
 import os
+import re
 
 plays = [
 "All's Well That Ends Well", "Antony and Cleopatra", "As You Like It",
@@ -39,8 +40,15 @@ def get_title_above_separator(text, separator):
     titles = pattern.findall(text)
     return titles
 
+def remove_text_between_arrows(text):
+    pattern = r'<<.*?>>'
+    return re.sub(pattern, '', text, flags=re.DOTALL)
+
+
 with open('..\data\shakespeare.txt', 'r') as file:
     content = file.read()
+    content = remove_text_between_arrows(content)
+
 
 separator = "by William Shakespeare"
 
@@ -54,19 +62,18 @@ def save_text(category, title, text):
     with open(f'Shakespeare/{category}/{title}.txt', 'w') as file:
         file.write(text)
 
-
 sections = content.split('by William Shakespeare')
 
-for section in sections:
+for i in range(len(sections) -1):
     for title in plays:
-        if title in section:
-            save_text('Plays', title, section)
+        if title in sections[i]:
+            save_text('Plays', title, sections[i+1])
             break
     for title in sonnets:
-        if title in section:
-            save_text('Sonnets', title, section)
+        if title in sections[i]:
+            save_text('Sonnets', title, sections[i+1])
             break
     for title in poems:
-        if title in section:
-            save_text('Poems', title, section)
+        if title in sections[i]:
+            save_text('Poems', title, sections[i+1])
             break
