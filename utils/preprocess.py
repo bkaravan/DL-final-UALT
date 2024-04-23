@@ -41,9 +41,6 @@ os.makedirs('Shakespeare/Poems', exist_ok=True)
 os.makedirs('Shakespeare/Other', exist_ok=True)
 
 
-
-import re
-
 def get_title_above_separator(text, separator):
     pattern = re.compile(r'^(.*)(?:\n|\r\n?)(?:.*)(?:\n|\r\n?)' + re.escape(separator), re.MULTILINE)
     titles = pattern.findall(text)
