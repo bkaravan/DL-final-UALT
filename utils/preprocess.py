@@ -7,6 +7,7 @@ import nltk
 #nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 import syllapy
+import re
 
 plays = [
 "All's Well That Ends Well", "Antony and Cleopatra", "As You Like It",
@@ -37,6 +38,8 @@ plays = [title.upper() for title in plays]
 os.makedirs('Shakespeare/Plays', exist_ok=True)
 os.makedirs('Shakespeare/Sonnets', exist_ok=True)
 os.makedirs('Shakespeare/Poems', exist_ok=True)
+os.makedirs('Shakespeare/Other', exist_ok=True)
+
 
 
 import re
