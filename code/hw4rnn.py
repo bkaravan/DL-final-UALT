@@ -32,8 +32,8 @@ class MyRNN(tf.keras.Model):
         #self.recurrent_layer = tf.keras.layers.GRU(self.rnn_size, return_sequences=True, return_state=False)
         self.recurrent_layer = tf.keras.layers.LSTM(self.rnn_size, return_sequences=True, return_state=False)
         ## - You may also want a dense layer near the end...
-        self.dense1 = tf.keras.layers.Dense(64, activation="leaky_relu")
-        # self.dense2 = tf.keras.layers.Dense(32, activation="relu")
+        self.dense1 = tf.keras.layers.Dense(512, activation="leaky_relu")
+        self.dense2 = tf.keras.layers.Dense(256, activation="relu")
         self.dense3 = tf.keras.layers.Dense(self.vocab_size, activation="softmax")
 
     def call(self, inputs):
@@ -44,7 +44,8 @@ class MyRNN(tf.keras.Model):
         embedded = self.embed_layer(inputs)
         rec_out1 = self.recurrent_layer(embedded)
         dout1 = self.dense1(rec_out1)
-        logits = self.dense3(dout1)
+        dout2 = self.dense2(dout1)
+        logits = self.dense3(dout2)
         return logits
 
     ##########################################################################################
@@ -130,25 +131,44 @@ def main():
     ##   from train_x and test_x. You also need to drop the first element from train_y and test_y.
     ##   If you don't do this, you will see very, very small perplexities.
     ##   HINT: You might be able to find this somewhere...
-    train, test, voc = get_data("poems_verses.txt", "othello.txt")
-    vocab = voc
+    train_grammar, test_grammar, voc_grammar = get_data("../data/train_grammar.txt", "../data/test_grammar.txt")
+    # vocab = voc
+
+    X0, Y0 = split_data(np.asarray(train_grammar), 20)
+    X1, Y1 = split_data(np.asarray(test_grammar), 20)
+
+    ## TODO: Get your model that you'd like to use
+    args = get_text_model(voc_grammar)
+
+    args.model.fit(
+        X0, Y0, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X1, Y1)
+    )
+
+    args.model.save_weights('first lstm try.h5')
+
+    # train, test, voc = get_data("../data/train.txt", "../data/test.txt")
+    #vocab = voc
+    train, test, voc = get_data("../data/train.txt", "../data/test.txt")
+
+    vocab_set = set(voc_grammar.keys()).union(set(voc.keys()))
+    vocab_combined = {word: idx for idx, word in enumerate(vocab_set)}
 
     X0, Y0 = split_data(np.asarray(train), 20)
     X1, Y1 = split_data(np.asarray(test), 20)
 
     ## TODO: Get your model that you'd like to use
-    args = get_text_model(vocab)
+    args.model.load_weights('first lstm try.h5')
 
     args.model.fit(
         X0, Y0, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X1, Y1)
     )
 
     ## Feel free to mess around with the word list to see the model try to generate sentences
-    for word1 in "speak to this brown deep learning student".split():
-        if word1 not in vocab:
+    for word1 in "Is it for fear to wet a widow's eye,".split():
+        if word1 not in vocab_combined:
             print(f"{word1} not in vocabulary")
         else:
-            args.model.generate_sentence(word1, 20, vocab, 10)
+            args.model.generate_sentence(word1, 20, vocab_combined, 10)
 
 
 if __name__ == "__main__":

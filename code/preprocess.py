@@ -5,9 +5,9 @@ import numpy as np
 from functools import reduce
 import nltk
 #nltk.download('punkt')
-from nltk.tokenize import word_tokenize
-import syllapy
-from hyphenate import hyphenate_word
+# from nltk.tokenize import word_tokenize
+# import syllapy
+# from hyphenate import hyphenate_word
 import re
 
 plays = [
@@ -38,10 +38,10 @@ poems = [title.upper() for title in poems]
 sonnets = [title.upper() for title in sonnets]
 plays = [title.upper() for title in plays]
 
-os.makedirs('Shakespeare/Plays', exist_ok=True)
-os.makedirs('Shakespeare/Sonnets', exist_ok=True)
-os.makedirs('Shakespeare/Poems', exist_ok=True)
-os.makedirs('Shakespeare/Other', exist_ok=True)
+os.makedirs('..utils/Shakespeare/Plays', exist_ok=True)
+os.makedirs('..utils/Shakespeare/Sonnets', exist_ok=True)
+os.makedirs('..utils/Shakespeare/Poems', exist_ok=True)
+os.makedirs('..utils/Shakespeare/Other', exist_ok=True)
 
 
 def get_title_above_separator(text, separator):
@@ -83,33 +83,33 @@ def split_shakespeare():
                 break
 
 
-def make_poem_ready(fname):
-    with open(fname, "r") as file:
-        lines = file.readlines()
+# def make_poem_ready(fname):
+#     with open(fname, "r") as file:
+#         lines = file.readlines()
     
-    tokens = [word_tokenize(line) for line in lines]
+#     tokens = [word_tokenize(line) for line in lines]
 
-    full_tokens = [token for sublist in tokens for token in sublist]
+#     full_tokens = [token for sublist in tokens for token in sublist]
 
-    #print(full_tokens)
+#     #print(full_tokens)
 
-    hyphen_toknes = []
+#     hyphen_toknes = []
     
-    with open("sample.txt", "w") as f:
-        count = 0
-        for token in full_tokens:
-            count += 1
-            #print(token)
+#     with open("sample.txt", "w") as f:
+#         count = 0
+#         for token in full_tokens:
+#             count += 1
+#             #print(token)
 
-            for hyph in hyphenate_word(token):
-                f.write(" " + hyph + " ")
-            f.write("<SEP>")
+#             for hyph in hyphenate_word(token):
+#                 f.write(" " + hyph + " ")
+#             f.write("<SEP>")
             
-            if count % 10 == 0:
-                f.write("\n")
+#             if count % 10 == 0:
+#                 f.write("\n")
             
     
-    return hyphen_toknes
+#     return hyphen_toknes
 
 #stuff = make_poem_ready("Shakespeare/Poems/A LOVER'S COMPLAINT.txt")
 
@@ -134,30 +134,67 @@ def get_data(train_file, test_file):
         vocabulary (Dict containg index->word mapping)
     """
     # Hint: You might not use all of the initialized variables depending on how you implement preprocessing. 
-    vocabulary, vocab_size, train_data, test_data = {}, 0, [], []
+    #vocabulary, vocab_size, train_data, test_data = {}, 0, [], []
 
     ## TODO: Implement pre-processing for the data files. See notebook for help on this.
 
+    # with open(train_file, "r") as t_file:
+    #     vocabulary = {'<UNK>': 0}
+    #     vocab_index = 1  # Start indexing from 1
+    #     for sentence in t_file:
+    #         split_sen = sentence.lower().strip().split(" ")
+    #         # print(split_sen)
+    #         train_data += split_sen
+    #         for word in split_sen:
+    #             if word not in vocabulary:
+    #                 vocabulary[word] = vocab_index
+    #                 vocab_index += 1
+    #                 train_data += split_sen
+            
+    #     file_unique_words = set(train_data)
+    #     vocabulary = {w:i for i,w in enumerate(file_unique_words)}
+    #     vocabulary["<UNK>"] = len(file_unique_words)
+    
+    # with open(test_file, "r") as test_f:
+    #     for sentence in test_f:
+    #         test_data += sentence.lower().strip().split(" ")
+    #     test_data = [word if word in vocabulary else '<UNK>' for word in test_data]
+
+
+    # # for word in test_data:
+    # #     if word not in vocabulary:
+    # #         print(word)
+    # # Sanity Check, make sure there are no new words in the test data.
+    # assert reduce(lambda x, y: x and (y in vocabulary), test_data)
+    
+    # train_data = list(map(lambda x: vocabulary[x], train_data))
+    # test_data  = list(map(lambda x: vocabulary[x], test_data))
+
+    # # print("train_data", train_data)
+    # return train_data, test_data, vocabulary
+
+
+    vocabulary, train_data, test_data = {'<UNK>': 0}, [], []
+    vocab_index = 1  # Start indexing from 1
+
+# Process training data and build vocabulary
     with open(train_file, "r") as t_file:
         for sentence in t_file:
             split_sen = sentence.lower().strip().split(" ")
-            # print(split_sen)
-            train_data += split_sen
-        file_unique_words = set(train_data)
-        vocabulary = {w:i for i,w in enumerate(file_unique_words)}
-    
+            for word in split_sen:
+                if word not in vocabulary:
+                    vocabulary[word] = vocab_index
+                    vocab_index += 1
+            train_data.extend(split_sen)
+
     with open(test_file, "r") as test_f:
         for sentence in test_f:
-            test_data += sentence.lower().strip().split(" ")
+            split_sen = sentence.lower().strip().split(" ")
+            test_data += [word if word in vocabulary else '<UNK>' for word in split_sen]
 
-    # for word in test_data:
-    #     if word not in vocabulary:
-    #         print(word)
-    # Sanity Check, make sure there are no new words in the test data.
-    assert reduce(lambda x, y: x and (y in vocabulary), test_data)
-    
-    train_data = list(map(lambda x: vocabulary[x], train_data))
-    test_data  = list(map(lambda x: vocabulary[x], test_data))
+    assert all(word in vocabulary for word in test_data)
 
-    # print("train_data", train_data)
+    train_data = [vocabulary[word] for word in train_data]
+    test_data = [vocabulary[word] for word in test_data]
+
     return train_data, test_data, vocabulary
