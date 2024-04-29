@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from utils.preprocess import get_data
+from preprocess import get_data
 from types import SimpleNamespace
 
 
