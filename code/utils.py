@@ -114,3 +114,6 @@ for word in words:
     syllables = hyphenate_word(word)
     #print(f"{word}: {'-'.join(syllables)}")
     print(syllables)
+
+
+

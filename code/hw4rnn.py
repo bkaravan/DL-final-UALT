@@ -130,7 +130,7 @@ def main():
     ##   from train_x and test_x. You also need to drop the first element from train_y and test_y.
     ##   If you don't do this, you will see very, very small perplexities.
     ##   HINT: You might be able to find this somewhere...
-    train, test, voc = get_data("../data/train.txt", "../data/test.txt")
+    train, test, voc = get_data("poems_verses.txt", "othello.txt")
     vocab = voc
 
     X0, Y0 = split_data(np.asarray(train), 20)
