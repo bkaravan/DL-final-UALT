@@ -51,9 +51,6 @@ def split_files(directory_path, train_output, test_output, is_poem):
     append_files(train_files, train_output, directory_path, is_poem)
     append_files(test_files, test_output, directory_path, is_poem)
 
-directory_path = '../utils/Shakespeare/Plays'
-split_files(directory_path, '../data/train_grammar.txt', '../data/test_grammar.txt', is_poem=False)
-
 
 
 def main():
@@ -62,6 +59,9 @@ def main():
 
     if not os.path.exists('../data/test.txt'):
         generate_test()
+    
+    directory_path = '../utils/Shakespeare/Plays'
+    split_files(directory_path, '../data/train_grammar.txt', '../data/test_grammar.txt', is_poem=False)
 
 if __name__ == "__main__":
     main()

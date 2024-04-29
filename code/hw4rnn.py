@@ -34,7 +34,9 @@ class MyRNN(tf.keras.Model):
         ## - You may also want a dense layer near the end...
         self.dense1 = tf.keras.layers.Dense(512, activation="leaky_relu")
         self.dense2 = tf.keras.layers.Dense(256, activation="relu")
-        self.dense3 = tf.keras.layers.Dense(self.vocab_size, activation="softmax")
+        self.dense3 = tf.keras.layers.Dense(32, activation="relu")
+        self.drop = tf.keras.layers.Dropout(0.25)
+        self.dense4 = tf.keras.layers.Dense(self.vocab_size, activation="softmax")
 
     def call(self, inputs):
         """
@@ -45,7 +47,10 @@ class MyRNN(tf.keras.Model):
         rec_out1 = self.recurrent_layer(embedded)
         dout1 = self.dense1(rec_out1)
         dout2 = self.dense2(dout1)
-        logits = self.dense3(dout2)
+        dout2 = self.drop(dout2)
+        dout3 = self.dense3(dout2)
+        dout3 = self.drop(dout3)
+        logits = self.dense4(dout3)
         return logits
 
     ##########################################################################################
@@ -101,7 +106,7 @@ def get_text_model(vocab):
 
     ## TODO: Compile your model using your choice of optimizer, loss, and metrics
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(0.025),
+        optimizer=tf.keras.optimizers.Adam(0.001),
         loss=loss_metric,
         metrics=[acc_metric],
     )
@@ -160,7 +165,7 @@ def main():
     args.model.load_weights('first lstm try.h5')
 
     args.model.fit(
-        X0, Y0, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X1, Y1)
+        X0, Y0, epochs=2, batch_size=args.batch_size, validation_data=(X1, Y1)
     )
 
     ## Feel free to mess around with the word list to see the model try to generate sentences
