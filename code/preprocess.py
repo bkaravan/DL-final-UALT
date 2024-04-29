@@ -11,17 +11,19 @@ from hyphenate import hyphenate_word
 import re
 
 plays = [
-"All's Well That Ends Well", "Antony and Cleopatra", "As You Like It",
+"All's Well That Ends Well", "ALLS WELL THAT ENDS WELL", "Antony and Cleopatra", "As You Like It",
 "The Comedy of Errors", "Cymbeline", "Love's Labours Lost",
 "Measure for Measure", "The Merry Wives of Windsor", "The Merchant of Venice",
 "A Midsummer Night's Dream", "Much Ado About Nothing", "Pericles, Prince of Tyre",
 "Taming of the Shrew", "The Tempest", "Troilus and Cressida", "Twelfth Night",
 "Two Gentlemen of Verona", "Winter's Tale", "Henry IV, part 1", "Henry IV, part 2",
-"Henry V", "Henry VI, part 1", "Henry VI, part 2", "Henry VI, part 3",
+"Henry V", "THE FIRST PART OF KING HENRY THE FOURTH", "Henry VI, part 1", "Henry VI, part 2", "Henry VI, part 3",
 "Henry VIII", "King John", "Richard II", "Richard III", "Antony and Cleopatra",
 "Coriolanus", "Hamlet", "Julius Caesar", "King Lear", "Macbeth", "Othello",
-"Romeo and Juliet", "Timon of Athens", "Titus Andronicus", "THE TRAGEDY OF KING LEAR"
-]
+"Romeo and Juliet", "Timon of Athens", "Titus Andronicus", "THE TRAGEDY OF KING LEAR", 
+"THE LIFE OF KING HENRY THE FIFTH","THE FIRST PART OF HENRY THE SIXTH", "THE THIRD PART OF KING HENRY THE SIXTH", 
+"KING HENRY THE EIGHTH", "LOVE'S LABOUR'S LOST",
+'SECOND PART OF KING HENRY IV', "THE SECOND PART OF KING HENRY THE SIXTH"]
 
 sonnets = [
 "1-17", "18-126", "127-154", "THE SONNETS"
