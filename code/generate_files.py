@@ -55,6 +55,20 @@ directory_path = '../utils/Shakespeare/Plays'
 split_files(directory_path, '../data/train_grammar.txt', '../data/test_grammar.txt', is_poem=False)
 
 
+# # Define the recombine_syllables function
+# def recombine_syllables(syllables, dictionary):
+#     words = []
+#     current_word = ''
+#     for syllable in syllables:
+#         potential_word = current_word + syllable
+#         if potential_word in dictionary:
+#             words.append(potential_word)
+#             current_word = ''
+#         else:
+#             current_word = potential_word
+#         if current_word:
+#             words.append(current_word)
+#     return ' '.join(words)
 
 def main():
     if not os.path.exists('../data/train.txt'):

@@ -71,8 +71,8 @@ class MyRNN(tf.keras.Model):
 
             text.append(reverse_vocab[out_index])
             next_input = np.array([[out_index]])
-
         print(" ".join(text))
+        return " ".join(text)  # Return the generated text instead of printing
 
 
 #########################################################################################
@@ -124,6 +124,30 @@ def split_data(to_split, window_size):
 
     return X_rnn, y_rnn
 
+# Define the recombine_syllables function
+def recombine_syllables(syllables, dictionary):
+    words = []
+    current_word = ''
+    for syllable in syllables:
+        potential_word = current_word + syllable
+        if potential_word in dictionary:
+            words.append(potential_word)
+            current_word = ''
+        else:
+            current_word = potential_word
+    if current_word:
+        words.append(current_word)
+    return ' '.join(words)
+
+
+# Add a new function to handle post-processing
+def post_process_generated_text(generated_text, dictionary):
+# Split the generated text into syllables
+    syllables = generated_text.split()
+    # Recombine the syllables into words
+    recombined_text = recombine_syllables(syllables, dictionary)
+    return recombined_text
+
 def main():
 
     ## TODO: Pre-process and vectorize the data
@@ -168,8 +192,16 @@ def main():
         if word1 not in vocab_combined:
             print(f"{word1} not in vocabulary")
         else:
-            args.model.generate_sentence(word1, 20, vocab_combined, 10)
+            # args.model.generate_sentence(word1, 20, vocab_combined, 10)
+            generated_text = args.model.generate_sentence(word1, 20, vocab_combined, 10)
+            if isinstance(generated_text, str):
 
+            # Post-process the generated text to recombine syllables
+                dictionary = set(vocab_combined.keys())  # Use your combined vocabulary as the dictionary
+                readable_text = post_process_generated_text(generated_text, dictionary)
+                print(readable_text)
+            else:
+                print("Generated text is not in the correct format.")
 
 if __name__ == "__main__":
     main()
