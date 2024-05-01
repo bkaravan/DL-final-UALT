@@ -4,10 +4,6 @@ import tensorflow as tf
 import numpy as np
 from functools import reduce
 import nltk
-#nltk.download('punkt')
-# from nltk.tokenize import word_tokenize
-# import syllapy
-# from hyphenate import hyphenate_word
 import re
 
 plays = [
@@ -81,35 +77,6 @@ def split_shakespeare():
             if title in section:
                 save_text('Poems', title, section)
                 break
-
-
-# def make_poem_ready(fname):
-#     with open(fname, "r") as file:
-#         lines = file.readlines()
-    
-#     tokens = [word_tokenize(line) for line in lines]
-
-#     full_tokens = [token for sublist in tokens for token in sublist]
-
-#     #print(full_tokens)
-
-#     hyphen_toknes = []
-    
-#     with open("sample.txt", "w") as f:
-#         count = 0
-#         for token in full_tokens:
-#             count += 1
-#             #print(token)
-
-#             for hyph in hyphenate_word(token):
-#                 f.write(" " + hyph + " ")
-#             f.write("<SEP>")
-            
-#             if count % 10 == 0:
-#                 f.write("\n")
-            
-    
-#     return hyphen_toknes
 
 #stuff = make_poem_ready("Shakespeare/Poems/A LOVER'S COMPLAINT.txt")
 

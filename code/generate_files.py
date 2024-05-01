@@ -2,6 +2,7 @@ import re
 import pyphen
 import os
 
+
 #file_path = "../utils/Shakespeare/Poems/A LOVER'S COMPLAINT.txt"
 def preprocess_text(file_path, is_poem=True):
     dic = pyphen.Pyphen(lang='en')
@@ -14,11 +15,12 @@ def preprocess_text(file_path, is_poem=True):
         text = re.sub(r'\b[A-Z][a-z]*\b', '<UNK>', text)
         text = ' <SEP> '.join(text.split())
         words = text.split()
-        text = ' '.join([dic.inserted(word, hyphen=' ') for word in words])
         # Hyphenate 
+        text = ' '.join([dic.inserted(word, hyphen=' ') for word in words])
         if is_poem:
             verses = text.split('<SEP> <br> <SEP> <br>')  # <SEP> <br> <SEP> <br> indicate an empty line / verse break
             text = ' <VER> '.join(verses)
+        text = text.replace("<br>", "")
 
         return text
 

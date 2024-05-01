@@ -8,7 +8,7 @@ class MyRNN(tf.keras.Model):
 
     ##########################################################################################
 
-    def __init__(self, vocab_size, rnn_size=128, embed_size=64):
+    def __init__(self, vocab_size, rnn_size=1024, embed_size=300):
         """
         The Model class predicts the next words in a sequence.
         : param vocab_size : The number of unique words in the data
@@ -31,31 +31,35 @@ class MyRNN(tf.keras.Model):
         ## - Define a recurrent component to reason with the sequence of data.
         #self.recurrent_layer = tf.keras.layers.GRU(self.rnn_size, return_sequences=True, return_state=False)
         self.recurrent_layer = tf.keras.layers.LSTM(self.rnn_size, return_sequences=True, return_state=False)
+        self.recurrent_layer2 = tf.keras.layers.LSTM(self.rnn_size, return_sequences=True, return_state=False)
+        self.reccurrent = [self.recurrent_layer]
         ## - You may also want a dense layer near the end...
-        self.dense1 = tf.keras.layers.Dense(512, activation="leaky_relu")
+        self.dense1 = tf.keras.layers.Dense(512, activation="relu")
         self.dense2 = tf.keras.layers.Dense(256, activation="relu")
-        self.dense3 = tf.keras.layers.Dense(32, activation="relu")
-        self.drop = tf.keras.layers.Dropout(0.25)
-        self.dense4 = tf.keras.layers.Dense(self.vocab_size, activation="softmax")
+        self.dense3 = tf.keras.layers.Dense(300, activation="relu")
+        self.drop = tf.keras.layers.Dropout(0.3)
+        self.dense_last = tf.keras.layers.Dense(self.vocab_size, activation="softmax")
+        self.fforward = [self.dense3]
+
+
 
     def call(self, inputs):
         """
         - You must use an embedding layer as the first layer of your network (i.e. tf.nn.embedding_lookup or tf.keras.layers.Embedding)
         - You must use an LSTM or GRU as the next layer.
         """
-        embedded = self.embed_layer(inputs)
-        rec_out1 = self.recurrent_layer(embedded)
-        dout1 = self.dense1(rec_out1)
-        dout2 = self.dense2(dout1)
-        dout2 = self.drop(dout2)
-        dout3 = self.dense3(dout2)
-        dout3 = self.drop(dout3)
-        logits = self.dense4(dout3)
+        out = self.embed_layer(inputs)
+        for recur in self.reccurrent:
+            out = recur(out)
+        for layer in self.fforward:
+            out = layer(out)
+            out = self.drop(out)
+        logits = self.dense_last(out)
         return logits
 
     ##########################################################################################
 
-    def generate_sentence(self, word1, length, vocab, sample_n=10):
+    def generate_sentence(self, word1, length, vocab, out_file, sample_n=10):
         """
         Takes a model, vocab, selects from the most likely next word from the model's distribution.
         (NOTE: you shouldn't need to make any changes to this function).
@@ -66,17 +70,27 @@ class MyRNN(tf.keras.Model):
         first_word_index = vocab[word1]
         next_input = np.array([[first_word_index]])
         text = [first_string]
+        output = ""
+        i = 0
 
-        for i in range(length):
+        while output.strip() != "<VER>" and i < 6:
             logits = self.call(next_input)
             logits = np.array(logits[0, 0, :])
             top_n = np.argsort(logits)[-sample_n:]
             n_logits = np.exp(logits[top_n]) / np.exp(logits[top_n]).sum()
             out_index = np.random.choice(top_n, p=n_logits)
 
-            text.append(reverse_vocab[out_index])
+            output = reverse_vocab[out_index]
+            text.append(output)
             next_input = np.array([[out_index]])
-        print(" ".join(text))
+            if len(text) % 9 == 0:
+                out_file.write(" ".join(text))
+                out_file.write("\n")
+                text = []
+                i += 1
+
+        out_file.write("\n")
+        out_file.write("\n")
         return " ".join(text)  # Return the generated text instead of printing
 
 
@@ -113,8 +127,8 @@ def get_text_model(vocab):
 
     return SimpleNamespace(
         model=model,
-        epochs=1,
-        batch_size=100,
+        epochs=2,
+        batch_size=32,
     )
 
 
@@ -161,13 +175,17 @@ def main():
     ##   If you don't do this, you will see very, very small perplexities.
     ##   HINT: You might be able to find this somewhere...
     train_grammar, test_grammar, voc_grammar = get_data("../data/train_grammar.txt", "../data/test_grammar.txt")
+    train, test, voc = get_data("../data/train.txt", "../data/test.txt")
+    vocab_set = set(voc_grammar.keys()).union(set(voc.keys()))
+    vocab_combined = {word: idx for idx, word in enumerate(vocab_set)}
+    print(len(voc_grammar))
     # vocab = voc
 
     X0, Y0 = split_data(np.asarray(train_grammar), 20)
     X1, Y1 = split_data(np.asarray(test_grammar), 20)
 
-    ## TODO: Get your model that you'd like to use
-    args = get_text_model(voc_grammar)
+    # ## TODO: Get your model that you'd like to use
+    args = get_text_model(vocab_combined)
 
     args.model.fit(
         X0, Y0, epochs=args.epochs, batch_size=args.batch_size, validation_data=(X1, Y1)
@@ -175,21 +193,26 @@ def main():
 
     args.model.save_weights('first lstm try.h5')
 
-    # train, test, voc = get_data("../data/train.txt", "../data/test.txt")
-    #vocab = voc
-    train, test, voc = get_data("../data/train.txt", "../data/test.txt")
 
-    vocab_set = set(voc_grammar.keys()).union(set(voc.keys()))
-    vocab_combined = {word: idx for idx, word in enumerate(vocab_set)}
+    for word1 in "Knight it for fear to wet a widow eye,".split():
+        if word1 not in vocab_combined:
+            print(f"{word1} not in vocabulary")
+        else:
+            # args.model.generate_sentence(word1, 20, vocab_combined, 10)
+            with open("../data/model_ouput_gram.txt", "a") as f:
+                generated_text = args.model.generate_sentence(word1, 20, vocab_combined, f, 10)
 
     X0, Y0 = split_data(np.asarray(train), 20)
     X1, Y1 = split_data(np.asarray(test), 20)
+
+    next_input = np.array([[10]])
+    args.model(next_input)
 
     ## TODO: Get your model that you'd like to use
     args.model.load_weights('first lstm try.h5')
 
     args.model.fit(
-        X0, Y0, epochs=2, batch_size=args.batch_size, validation_data=(X1, Y1)
+        X0, Y0, epochs=5, batch_size=args.batch_size, validation_data=(X1, Y1)
     )
 
     ## Feel free to mess around with the word list to see the model try to generate sentences
@@ -198,15 +221,16 @@ def main():
             print(f"{word1} not in vocabulary")
         else:
             # args.model.generate_sentence(word1, 20, vocab_combined, 10)
-            generated_text = args.model.generate_sentence(word1, 20, vocab_combined, 10)
-            if isinstance(generated_text, str):
+            with open("../data/model_ouput2.txt", "a") as f:
+                generated_text = args.model.generate_sentence(word1, 20, vocab_combined, f, 10)
+            # if isinstance(generated_text, str):
 
-            # Post-process the generated text to recombine syllables
-                dictionary = set(vocab_combined.keys())  # Use your combined vocabulary as the dictionary
-                readable_text = post_process_generated_text(generated_text, dictionary)
-                print(readable_text)
-            else:
-                print("Generated text is not in the correct format.")
+            # # Post-process the generated text to recombine syllables
+            #     dictionary = set(vocab_combined.keys())  # Use your combined vocabulary as the dictionary
+            #     readable_text = post_process_generated_text(generated_text, dictionary)
+            #     print(readable_text)
+            # else:
+            #     print("Generated text is not in the correct format.")
 
 if __name__ == "__main__":
     main()
