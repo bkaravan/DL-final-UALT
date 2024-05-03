@@ -145,7 +145,7 @@ def get_data(train_file, test_file):
     vocab_index = 1  # Start indexing from 1
 
 # Process training data and build vocabulary
-    with open(train_file, "r") as t_file:
+    with open(train_file, "r", encoding="utf-8") as t_file:
         for sentence in t_file:
             split_sen = sentence.lower().strip().split(" ")
             for word in split_sen:
@@ -154,7 +154,7 @@ def get_data(train_file, test_file):
                     vocab_index += 1
             train_data.extend(split_sen)
 
-    with open(test_file, "r") as test_f:
+    with open(test_file, "r", encoding="utf-8") as test_f:
         for sentence in test_f:
             split_sen = sentence.lower().strip().split(" ")
             test_data += [word if word in vocabulary else '<UNK>' for word in split_sen]
