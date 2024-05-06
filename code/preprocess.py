@@ -103,43 +103,6 @@ def get_data(train_file, test_file):
     # Hint: You might not use all of the initialized variables depending on how you implement preprocessing. 
     #vocabulary, vocab_size, train_data, test_data = {}, 0, [], []
 
-    ## TODO: Implement pre-processing for the data files. See notebook for help on this.
-
-    # with open(train_file, "r") as t_file:
-    #     vocabulary = {'<UNK>': 0}
-    #     vocab_index = 1  # Start indexing from 1
-    #     for sentence in t_file:
-    #         split_sen = sentence.lower().strip().split(" ")
-    #         # print(split_sen)
-    #         train_data += split_sen
-    #         for word in split_sen:
-    #             if word not in vocabulary:
-    #                 vocabulary[word] = vocab_index
-    #                 vocab_index += 1
-    #                 train_data += split_sen
-            
-    #     file_unique_words = set(train_data)
-    #     vocabulary = {w:i for i,w in enumerate(file_unique_words)}
-    #     vocabulary["<UNK>"] = len(file_unique_words)
-    
-    # with open(test_file, "r") as test_f:
-    #     for sentence in test_f:
-    #         test_data += sentence.lower().strip().split(" ")
-    #     test_data = [word if word in vocabulary else '<UNK>' for word in test_data]
-
-
-    # # for word in test_data:
-    # #     if word not in vocabulary:
-    # #         print(word)
-    # # Sanity Check, make sure there are no new words in the test data.
-    # assert reduce(lambda x, y: x and (y in vocabulary), test_data)
-    
-    # train_data = list(map(lambda x: vocabulary[x], train_data))
-    # test_data  = list(map(lambda x: vocabulary[x], test_data))
-
-    # # print("train_data", train_data)
-    # return train_data, test_data, vocabulary
-
 
     vocabulary, train_data, test_data = {'<UNK>': 0}, [], []
     vocab_index = 1  # Start indexing from 1
@@ -148,20 +111,31 @@ def get_data(train_file, test_file):
     with open(train_file, "r", encoding="utf-8") as t_file:
         for sentence in t_file:
             split_sen = sentence.lower().strip().split(" ")
-            for word in split_sen:
-                if word not in vocabulary:
-                    vocabulary[word] = vocab_index
-                    vocab_index += 1
+            if vocab_index < 4000:
+                for word in split_sen:
+                    if word not in vocabulary:
+                        vocabulary[word] = vocab_index
+                        vocab_index += 1
+            else:
+                split_sen = [word if word in vocabulary else '<UNK>' for word in split_sen]
             train_data.extend(split_sen)
 
     with open(test_file, "r", encoding="utf-8") as test_f:
         for sentence in test_f:
             split_sen = sentence.lower().strip().split(" ")
             test_data += [word if word in vocabulary else '<UNK>' for word in split_sen]
+    
+    # for word in split_sen:
+    #     if word not in vocabulary:
+    #         print(word)
+    
+    #print(test_data)
 
     assert all(word in vocabulary for word in test_data)
 
     train_data = [vocabulary[word] for word in train_data]
     test_data = [vocabulary[word] for word in test_data]
+
+    #print(test_data)
 
     return train_data, test_data, vocabulary

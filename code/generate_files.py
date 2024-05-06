@@ -2,12 +2,13 @@ import re
 import pyphen
 import os
 import nltk
+from hyphenate import hyphenate_word
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 
-nltk.download('punkt')
-nltk.download('wordnet')
+# nltk.download('punkt')
+# nltk.download('wordnet')
 
 
 
@@ -32,13 +33,17 @@ def preprocess_text(file_path, is_poem=True):
         stemmed_words = [stemmer.stem(word) for word in words]
 
 # Rejoin the stemmed words
-        text = ' '.join(stemmed_words)
+       
         if is_poem:
-            verses = text.split(
-                "<SEP> <br> <SEP> <br>"
-            )  # <SEP> <br> <SEP> <br> indicate an empty line / verse break
-            text = " <VER> ".join(verses)
-        text = text.replace("<br>", "\n")
+            hyphenate_words = []
+            for word in stemmed_words:
+                hyphenated = hyphenate_word(word)
+                hyphenate_words += hyphenated
+            stemmed_words = hyphenate_words
+
+        text = ' '.join(stemmed_words)
+        text = text.replace("< br >", "\n")
+        text = text.replace("< num >", "<GO>" )
 
         return text
 
@@ -109,8 +114,13 @@ def main():
     if not os.path.exists("../data/train_book.txt"):
         generate_book("../data/train_book.txt", "../data/adventures.txt")
 
-    directory_path = '../utils/Shakespeare/Plays'
-    split_files(directory_path, '../data/train_grammar.txt', '../data/test_grammar.txt', is_poem=False)
+    if not os.path.exists("../data/train_hyphen.txt"):
+        generate_file(
+            "../data/train_hyphen.txt", "../utils/Shakespeare/Sonnets/THE SONNETS.txt"
+        )
+
+    # directory_path = '../utils/Shakespeare/Plays'
+    # split_files(directory_path, '../data/train_grammar.txt', '../data/test_grammar.txt', is_poem=False)
 
 
 if __name__ == "__main__":
